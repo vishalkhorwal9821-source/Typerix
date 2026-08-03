@@ -83,7 +83,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <div>
             <h1 className="text-base sm:text-xl font-black tracking-wider bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-              TYPERIX
+              TYPRIX
             </h1>
             <p className="text-[9px] text-cyan-400/60 font-mono tracking-widest hidden md:block">WORLD'S BEST AI TYPING PLATFORM</p>
           </div>

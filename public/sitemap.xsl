@@ -4,7 +4,7 @@
   <xsl:template match="/">
     <html lang="en">
       <head>
-        <title>XML Sitemap — Typerix Platform</title>
+        <title>XML Sitemap — Typrix Platform</title>
         <style>
           body { font-family: system-ui, -apple-system, sans-serif; background-color: #020617; color: #f8fafc; padding: 2rem; margin: 0; }
           h1 { color: #22d3ee; margin-bottom: 0.5rem; }
@@ -17,7 +17,7 @@
         </style>
       </head>
       <body>
-        <h1>TYPERIX — XML Sitemap</h1>
+        <h1>TYPRIX — XML Sitemap</h1>
         <p>This is an XML Sitemap generated for Google Search Console &amp; search engines.</p>
         <table>
           <thead>
