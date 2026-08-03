@@ -44,6 +44,8 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
   const [liveAccuracy, setLiveAccuracy] = useState<number>(100);
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const activeCaretRef = useRef<HTMLSpanElement>(null);
   const lastKeyTimeRef = useRef<number>(0);
 
   useEffect(() => {
@@ -67,6 +69,17 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       inputRef.current.focus();
     }
   };
+
+  // Auto-scroll active caret line into center of view
+  useEffect(() => {
+    if (activeCaretRef.current) {
+      activeCaretRef.current.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'nearest',
+      });
+    }
+  }, [typedInput.length]);
 
   // Timer countdown hook for time mode
   useEffect(() => {
@@ -324,6 +337,7 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
 
       {/* Main Text Typing View Box */}
       <div
+        ref={containerRef}
         onClick={() => inputRef.current?.focus()}
         className={`w-full min-h-[220px] max-h-[340px] overflow-y-auto p-8 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all ${
           dyslexicFont ? 'font-sans text-xl leading-relaxed tracking-wide' : 'font-mono text-2xl leading-relaxed tracking-normal'
@@ -354,7 +368,11 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
             }
 
             return (
-              <span key={index} className={`relative ${charStyle}`}>
+              <span
+                key={index}
+                ref={isCurrent ? activeCaretRef : null}
+                className={`relative ${charStyle}`}
+              >
                 {/* Active Caret Cursor */}
                 {isCurrent && (
                   <span className="absolute -left-0.5 top-0 bottom-0 w-0.5 bg-cyan-400 animate-pulse shadow-[0_0_8px_#22d3ee]" />
