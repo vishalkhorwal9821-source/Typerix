@@ -8,6 +8,7 @@ import { AICoachCard } from './components/AICoachCard';
 import { GhostRace } from './components/GhostRace';
 import { RPGPanel } from './components/RPGPanel';
 import { CustomTextModal } from './components/CustomTextModal';
+import { Footer } from './components/Footer';
 
 import type {
   TestMode,
@@ -346,10 +347,8 @@ export function App() {
         />
       )}
 
-      {/* Footer */}
-      <footer className="w-full text-center py-4 text-[11px] text-slate-400 font-mono border-t border-slate-900 mt-6 px-4">
-        <p>TYPERIX PLATFORM — READY FOR VERCEL DEPLOYMENT</p>
-      </footer>
+      {/* Footer Component */}
+      <Footer />
     </div>
   );
 }
