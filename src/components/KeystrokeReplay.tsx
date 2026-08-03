@@ -21,27 +21,39 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({ result }) => {
   const [speedMultiplier, setSpeedMultiplier] = useState<number>(1);
 
   const totalSteps = result?.keystrokes?.length || 0;
-  const currentKeystroke = totalSteps > 0 ? result.keystrokes[currentIndex] : null;
+
+  // Reset playback whenever a new test result is loaded
+  useEffect(() => {
+    setCurrentIndex(0);
+    setIsPlaying(false);
+  }, [result.id]);
+
+  const currentKeystroke = totalSteps > 0 && currentIndex < totalSteps ? result.keystrokes[currentIndex] : null;
 
   useEffect(() => {
     let timeout: ReturnType<typeof setTimeout> | null = null;
 
-    if (isPlaying && totalSteps > 0 && currentIndex < totalSteps - 1) {
+    if (isPlaying && totalSteps > 0) {
+      if (currentIndex >= totalSteps - 1) {
+        setIsPlaying(false);
+        return;
+      }
+
       const currentKs = result.keystrokes[currentIndex];
-      const delay = Math.max(30, Math.min(400, (currentKs?.delayMs || 100) / speedMultiplier));
+      const delay = Math.max(25, Math.min(350, (currentKs?.delayMs || 100) / speedMultiplier));
 
       timeout = setTimeout(() => {
         setCurrentIndex((prev) => {
           const next = prev + 1;
-          const nextKs = result.keystrokes[next];
-          if (nextKs) {
-            soundEngine.playKeyPress(!nextKs.isCorrect, nextKs.char === ' ');
+          if (next < totalSteps) {
+            const nextKs = result.keystrokes[next];
+            if (nextKs) {
+              soundEngine.playKeyPress(!nextKs.isCorrect, nextKs.char === ' ');
+            }
           }
           return next;
         });
       }, delay);
-    } else if (currentIndex >= totalSteps - 1) {
-      setIsPlaying(false);
     }
 
     return () => {
@@ -52,6 +64,16 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({ result }) => {
   if (totalSteps === 0) {
     return null;
   }
+
+  const handleTogglePlay = () => {
+    if (currentIndex >= totalSteps - 1) {
+      // If at end, restart from beginning
+      setCurrentIndex(0);
+      setIsPlaying(true);
+    } else {
+      setIsPlaying(!isPlaying);
+    }
+  };
 
   const handleRestart = () => {
     setCurrentIndex(0);
@@ -66,23 +88,23 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({ result }) => {
       {/* Header Bar */}
       <div className="flex flex-wrap items-center justify-between border-b border-slate-800 pb-3 gap-2">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-md">
             <Activity className="w-4 h-4 text-white" />
           </div>
           <div>
             <h3 className="text-base sm:text-lg font-bold text-slate-100">3D Keystroke Replay</h3>
-            <p className="text-[10px] text-cyan-400/70 font-mono">Real-time typing playback with live key lighting</p>
+            <p className="text-[10px] text-cyan-400/70 font-mono">Interactive step-by-step playback with live key lighting</p>
           </div>
         </div>
 
         {/* Playback Controls */}
         <div className="flex items-center gap-1.5 sm:gap-2">
           <button
-            onClick={() => setIsPlaying(!isPlaying)}
+            onClick={handleTogglePlay}
             className="px-3 sm:px-4 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-bold text-xs flex items-center gap-1.5 transition-all shadow-md active:scale-95"
           >
             {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-            <span>{isPlaying ? 'Pause' : 'Play'}</span>
+            <span>{isPlaying ? 'Pause' : currentIndex >= totalSteps - 1 ? 'Replay' : 'Play'}</span>
           </button>
 
           <button
@@ -94,7 +116,7 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({ result }) => {
           </button>
 
           {/* Speed Selector */}
-          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl text-xs font-mono">
+          <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl text-xs font-mono border border-slate-800">
             {[0.5, 1, 2, 4].map((s) => (
               <button
                 key={s}
@@ -126,22 +148,22 @@ export const KeystrokeReplay: React.FC<KeystrokeReplayProps> = ({ result }) => {
 
         <div className="flex flex-wrap items-center justify-between text-xs font-mono text-slate-400 gap-2">
           <div className="flex items-center gap-3">
-            <span>Keystroke {currentIndex + 1} / {totalSteps}</span>
+            <span>Step {currentIndex + 1} / {totalSteps}</span>
             <span className="text-cyan-400 font-bold">
-              Speed: {currentKeystroke?.instantWpm || result.wpm} WPM
+              Instant Speed: {currentKeystroke?.instantWpm || result.wpm} WPM
             </span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span>Delay: {currentKeystroke?.delayMs || 0}ms</span>
+            <span>Keystroke Delay: {currentKeystroke?.delayMs || 0}ms</span>
             <span className="text-indigo-300">
-              Timestamp: {((currentKeystroke?.timestamp || 0) / 1000).toFixed(2)}s
+              Time: {((currentKeystroke?.timestamp || 0) / 1000).toFixed(2)}s
             </span>
           </div>
         </div>
       </div>
 
-      {/* Live Replay Text Box */}
+      {/* Live Replay Text Display */}
       <div className="p-4 sm:p-6 bg-slate-950 rounded-2xl border border-slate-800/80 font-mono text-lg sm:text-xl leading-relaxed break-words min-h-[100px] max-h-[180px] overflow-y-auto">
         {visibleKeystrokes.map((ks, idx) => (
           <span

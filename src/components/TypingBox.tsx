@@ -70,7 +70,7 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
     }
   };
 
-  // Scroll ONLY the text box container (never jumping the outer page window)
+  // Instant precise container scrollTop tracking on every keystroke
   useEffect(() => {
     if (activeCaretRef.current && containerRef.current) {
       const container = containerRef.current;
@@ -78,10 +78,9 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       const caretTop = caret.offsetTop;
       const containerHeight = container.clientHeight;
 
-      container.scrollTo({
-        top: Math.max(0, caretTop - containerHeight / 2 + 15),
-        behavior: 'smooth',
-      });
+      // Keep active caret line centered inside the container instantly without animation locks
+      const targetScroll = Math.max(0, caretTop - containerHeight / 3);
+      container.scrollTop = targetScroll;
     }
   }, [typedInput.length]);
 
@@ -337,11 +336,11 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
         </div>
       </div>
 
-      {/* Container-Scoped Scrollable Text Typing View Box */}
+      {/* Container-Scoped Text Typing View Box */}
       <div
         ref={containerRef}
         onClick={() => inputRef.current?.focus()}
-        className={`w-full h-[200px] sm:h-[260px] overflow-y-auto p-4 sm:p-8 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all scroll-smooth ${
+        className={`w-full h-[220px] sm:h-[280px] overflow-y-auto p-4 sm:p-8 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all ${
           dyslexicFont ? 'font-sans text-lg sm:text-xl leading-relaxed tracking-wide' : 'font-mono text-lg sm:text-2xl leading-relaxed tracking-normal'
         }`}
       >
