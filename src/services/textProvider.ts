@@ -26,7 +26,10 @@ const COMMON_WORDS = [
   'well', 'people', 'down', 'own', 'just', 'because', 'good', 'each', 'those', 'feel', 'seem', 'how',
   'high', 'too', 'place', 'little', 'world', 'very', 'still', 'nation', 'hand', 'old', 'life', 'tell',
   'write', 'become', 'here', 'show', 'house', 'both', 'between', 'need', 'mean', 'call', 'develop',
-  'system', 'program', 'process', 'keyboard', 'rhythm', 'focus', 'speed', 'accuracy', 'mastery', 'flow'
+  'system', 'program', 'process', 'keyboard', 'rhythm', 'focus', 'speed', 'accuracy', 'mastery', 'flow',
+  'practice', 'engine', 'quantum', 'future', 'cyber', 'network', 'matrix', 'crystal', 'energy', 'spirit',
+  'challenge', 'victory', 'horizon', 'dimension', 'freedom', 'inspire', 'courage', 'strength', 'knowledge',
+  'wisdom', 'harmony', 'symphony', 'spectrum', 'architect', 'pioneer', 'catalyst', 'momentum', 'synergy'
 ];
 
 const NUMBERS_POOL = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '42', '99', '100', '3.14', '2026', '777', '1337', '9000', '10000'];
@@ -34,36 +37,28 @@ const SYMBOLS_POOL = ['!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '-', '_'
 
 const CATEGORY_TEXTS: Record<TextCategory, string[]> = {
   general: [
-    "Mastery in typing is built on consistent daily practice, flawless accuracy, and relaxed hand posture rather than forced speed.",
-    "The rapid growth of modern web applications requires developers to type code efficiently while keeping mental focus intact."
+    "Mastery in typing is built on consistent daily practice, flawless accuracy, and relaxed hand posture rather than forced speed. The rapid growth of modern web applications requires developers to type code efficiently while keeping mental focus intact. Building high performance user interfaces demands clean software architecture, component modularity, and smooth micro animations."
   ],
   science: [
-    "Quantum computing uses qubits capable of superposition and entanglement, solving complex cryptographic problems exponentially faster than classical computers.",
-    "Artificial neural networks mimic biological brains through layers of interconnected nodes, optimizing weights via gradient descent backpropagation."
+    "Quantum computing uses qubits capable of superposition and entanglement, solving complex cryptographic problems exponentially faster than classical computers. Artificial neural networks mimic biological brains through layers of interconnected nodes, optimizing weights via gradient descent backpropagation."
   ],
   history: [
-    "The Renaissance ignited a profound cultural rebirth in Europe, driving revolutionary advances in art, science, philosophy, and humanism.",
-    "The Industrial Revolution transformed global economies from agrarian craftsmanship to mechanization, steam engines, and mass production factories."
+    "The Renaissance ignited a profound cultural rebirth in Europe, driving revolutionary advances in art, science, philosophy, and humanism. The Industrial Revolution transformed global economies from agrarian craftsmanship to mechanization, steam engines, and mass production factories."
   ],
   exams: [
-    "UPSC Civil Services Examination tests comprehensive knowledge of constitutional law, economic development, Indian history, and global geopolitics.",
-    "GATE computer science syllabus includes data structures, algorithms, compiler design, database management systems, and operating system kernels."
+    "UPSC Civil Services Examination tests comprehensive knowledge of constitutional law, economic development, Indian history, and global geopolitics. GATE computer science syllabus includes data structures, algorithms, compiler design, database management systems, and operating system kernels."
   ],
   medical: [
-    "Myocardial infarction occurs when blood flow to a coronary artery section is blocked, leading to ischemia and cardiac tissue necrosis.",
-    "Pharmacokinetics analyzes drug absorption, distribution, metabolism by hepatic enzymes, and renal excretion over time."
+    "Myocardial infarction occurs when blood flow to a coronary artery section is blocked, leading to ischemia and cardiac tissue necrosis. Pharmacokinetics analyzes drug absorption, distribution, metabolism by hepatic enzymes, and renal excretion over time."
   ],
   anime: [
-    "A lesson without pain is meaningless. You cannot gain something without sacrificing something else in return.",
-    "Power isn't determined by your size, but by the size of your heart and dreams. Stand tall and keep pushing beyond your limits!"
+    "A lesson without pain is meaningless. You cannot gain something without sacrificing something else in return. Power isn't determined by your size, but by the size of your heart and dreams. Stand tall and keep pushing beyond your limits!"
   ],
   quotes: [
-    "Do not go where the path may lead, go instead where there is no path and leave a trail. — Ralph Waldo Emerson",
-    "The only limit to our realization of tomorrow will be our doubts of today. — Franklin D. Roosevelt"
+    "Do not go where the path may lead, go instead where there is no path and leave a trail. — Ralph Waldo Emerson"
   ],
   code: [
-    "const calculateWpm = (chars, seconds) => Math.round((chars / 5) / (seconds / 60));",
-    "function binarySearch(arr, target) { let l = 0, r = arr.length - 1; while (l <= r) { const mid = Math.floor((l + r) / 2); if (arr[mid] === target) return mid; if (arr[mid] < target) l = mid + 1; else r = mid - 1; } return -1; }"
+    "const calculateWpm = (chars, seconds) => Math.round((chars / 5) / (seconds / 60)); function binarySearch(arr, target) { let l = 0, r = arr.length - 1; while (l <= r) { const mid = Math.floor((l + r) / 2); if (arr[mid] === target) return mid; if (arr[mid] < target) l = mid + 1; else r = mid - 1; } return -1; }"
   ]
 };
 
@@ -125,6 +120,12 @@ export function generateTestText(
     return EXAM_SNIPPETS[examType] || EXAM_SNIPPETS.ssc_chsl;
   }
 
+  // In TIME mode, generate 350 to 500 words so paragraph NEVER ends until the timer expires!
+  let targetWordCount = wordCount;
+  if (mode === 'time') {
+    targetWordCount = 450; // Long continuous paragraph for time mode!
+  }
+
   let pool = [...COMMON_WORDS];
   if (subMode === 'numbers') {
     pool = [...NUMBERS_POOL];
@@ -135,7 +136,7 @@ export function generateTestText(
   }
 
   const resultWords: string[] = [];
-  for (let i = 0; i < wordCount; i++) {
+  for (let i = 0; i < targetWordCount; i++) {
     const word = pool[Math.floor(Math.random() * pool.length)];
     resultWords.push(word);
   }
