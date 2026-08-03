@@ -15,8 +15,9 @@ import {
   Bot,
   Ghost,
   BookOpen,
+  Layers,
 } from 'lucide-react';
-import type { TestMode, TimeOption, WordOption, SubMode, CodeLanguage, UserProfile, TextCategory } from '../types';
+import type { TestMode, TimeOption, WordOption, SubMode, CodeLanguage, UserProfile, TextCategory, DifficultyLevel } from '../types';
 
 interface HeaderProps {
   mode: TestMode;
@@ -25,6 +26,8 @@ interface HeaderProps {
   setSubMode: (sm: SubMode) => void;
   category: TextCategory;
   setCategory: (c: TextCategory) => void;
+  difficulty: DifficultyLevel;
+  setDifficulty: (d: DifficultyLevel) => void;
   timeOption: TimeOption;
   setTimeOption: (t: TimeOption) => void;
   wordOption: WordOption;
@@ -50,6 +53,8 @@ export const Header: React.FC<HeaderProps> = ({
   setSubMode,
   category,
   setCategory,
+  difficulty,
+  setDifficulty,
   timeOption,
   setTimeOption,
   wordOption,
@@ -68,7 +73,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCustomModal,
 }) => {
   return (
-    <header className="w-full max-w-6xl mx-auto pt-4 pb-2 px-4 flex flex-col gap-3">
+    <header className="w-full max-w-[1700px] mx-auto pt-4 pb-2 px-6 flex flex-col gap-3">
       {/* Top Navbar */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-500/20 pb-3">
         {/* Brand Logo */}
@@ -179,6 +184,16 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
 
           <button
+            onClick={() => setMode('article')}
+            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+              mode === 'article' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5" />
+            <span>Articles (600+ W)</span>
+          </button>
+
+          <button
             onClick={() => setMode('category')}
             className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'category' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
@@ -239,6 +254,24 @@ export const Header: React.FC<HeaderProps> = ({
           </button>
         </div>
 
+        {/* Article Difficulty Selector if Article mode */}
+        {mode === 'article' && (
+          <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl text-[11px] font-mono">
+            <span className="text-slate-400 px-1 font-bold">DIFFICULTY:</span>
+            {(['easy', 'medium', 'hard'] as DifficultyLevel[]).map((d) => (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={`px-2.5 py-0.5 rounded-lg uppercase transition-all ${
+                  difficulty === d ? 'bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/40' : 'text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        )}
+
         {/* Category Pills if Category mode */}
         {mode === 'category' && (
           <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl text-[11px] font-mono">
@@ -256,7 +289,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         )}
 
-        {/* Sub-Option Selector depending on mode */}
+        {/* Sub-Option Selector */}
         <div className="flex items-center gap-1 bg-slate-950/60 p-1 rounded-xl text-xs font-mono">
           {mode === 'time' && (
             <>

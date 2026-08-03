@@ -102,7 +102,6 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       }
     }
 
-    // Standard Net WPM formula: Net WPM = ( (Correct Chars / 5) - (Uncorrected Errors * 0.2) ) / Elapsed Minutes
     const netWpm = Math.max(0, Math.round(((correctChars / 5) - (errorCount * 0.2)) / elapsedMinutes));
 
     setLiveWpm(netWpm);
@@ -203,7 +202,6 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       }
     }
 
-    // Precise Standard WPM calculations
     const rawWpm = Math.round((finalTyped.length / 5) / durationMinutes);
     const netWpm = Math.max(0, Math.round(((correctChars / 5) - (errorCount * 0.2)) / durationMinutes));
 
@@ -257,6 +255,7 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       mode,
       subMode,
       category,
+      difficulty: 'easy',
       keystrokes,
       heatmap,
       fingerStats,

@@ -1,7 +1,8 @@
-export type TestMode = 'time' | 'words' | 'quote' | 'code' | 'category' | 'zen' | 'exam' | 'custom' | 'rpg' | 'ghost';
+export type TestMode = 'time' | 'words' | 'quote' | 'code' | 'category' | 'article' | 'zen' | 'exam' | 'custom' | 'rpg' | 'ghost';
 export type SubMode = 'normal' | 'numbers' | 'symbols' | 'mixed' | 'blind';
 
 export type TextCategory = 'general' | 'code' | 'science' | 'history' | 'exams' | 'medical' | 'anime' | 'quotes';
+export type DifficultyLevel = 'easy' | 'medium' | 'hard';
 
 export type TimeOption = 15 | 30 | 60 | 120;
 export type WordOption = 10 | 25 | 50 | 100 | 250;
@@ -60,6 +61,7 @@ export interface TestResult {
   mode: TestMode;
   subMode: SubMode;
   category: TextCategory;
+  difficulty: DifficultyLevel;
   keystrokes: Keystroke[];
   heatmap: Record<string, KeyHeatmapData>;
   fingerStats: Record<string, FingerStat>;
@@ -81,7 +83,7 @@ export interface UserProfile {
   activeSound: string;
   unlockedSounds: string[];
   unlockedBadges: string[];
-  personalBests: Record<string, number>; // mode -> WPM
+  personalBests: Record<string, number>;
   totalTests: number;
   totalCharactersTyped: number;
   totalTimeTypedSeconds: number;
@@ -105,9 +107,9 @@ export interface AICoachInsight {
   confusedPairs: { expected: string; typed: string; count: number }[];
   fatigueDetected: boolean;
   fatigueTimeSec?: number;
-  confidenceScore: number; // 0 - 100
-  enduranceScore: number; // 0 - 100
-  rhythmScore: number; // 0 - 100
+  confidenceScore: number;
+  enduranceScore: number;
+  rhythmScore: number;
   advice: string[];
   recommendedText: string;
 }

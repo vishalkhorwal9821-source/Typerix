@@ -19,6 +19,7 @@ import type {
   UserProfile,
   Quest,
   TextCategory,
+  DifficultyLevel,
 } from './types';
 
 import { generateTestText } from './services/textProvider';
@@ -33,6 +34,7 @@ export function App() {
   const [mode, setMode] = useState<TestMode>('time');
   const [subMode, setSubMode] = useState<SubMode>('normal');
   const [category, setCategory] = useState<TextCategory>('general');
+  const [difficulty, setDifficulty] = useState<DifficultyLevel>('easy');
   const [timeOption, setTimeOption] = useState<TimeOption>(30);
   const [wordOption, setWordOption] = useState<WordOption>(25);
   const [codeLang, setCodeLang] = useState<CodeLanguage>('javascript');
@@ -52,8 +54,8 @@ export function App() {
   const currentTheme = useMemo(() => getTheme(profile.activeTheme), [profile.activeTheme]);
 
   const targetText = useMemo(() => {
-    return generateTestText(mode, subMode, wordOption, codeLang, 'ssc_chsl', category, customRawText);
-  }, [mode, subMode, wordOption, codeLang, category, customRawText]);
+    return generateTestText(mode, subMode, wordOption, codeLang, 'ssc_chsl', category, difficulty, customRawText);
+  }, [mode, subMode, wordOption, codeLang, category, difficulty, customRawText]);
 
   const [textKey, setTextKey] = useState<number>(0);
 
@@ -102,6 +104,8 @@ export function App() {
         setSubMode={setSubMode}
         category={category}
         setCategory={setCategory}
+        difficulty={difficulty}
+        setDifficulty={setDifficulty}
         timeOption={timeOption}
         setTimeOption={setTimeOption}
         wordOption={wordOption}
@@ -215,7 +219,7 @@ export function App() {
           />
         </section>
 
-        {/* Right Column: Studio Dashboard & Stats Sidebar (4 Columns - Fills Space) */}
+        {/* Right Column: Studio Dashboard & Stats Sidebar (4 Columns) */}
         <aside className="lg:col-span-4 flex flex-col gap-5 w-full">
           {/* User Profile & Streak Widget */}
           <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-2xl flex flex-col gap-4">
