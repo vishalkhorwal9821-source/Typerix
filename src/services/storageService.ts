@@ -1,9 +1,9 @@
 import type { UserProfile, TestResult, Quest } from '../types';
 
 const STORAGE_KEYS = {
-  PROFILE: 'typerix_user_profile',
-  HISTORY: 'typerix_test_history',
-  QUESTS: 'typerix_daily_quests',
+  PROFILE: 'typrix_user_profile',
+  HISTORY: 'typrix_test_history',
+  QUESTS: 'typrix_daily_quests',
 };
 
 // Cookie persistence helpers

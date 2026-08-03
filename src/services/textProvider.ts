@@ -66,11 +66,11 @@ const CODE_SNIPPETS: Record<CodeLanguage, string[]> = {
   javascript: ["const fetchUserData = async (userId) => {\n  const response = await fetch(`/api/user/${userId}`);\n  return response.json();\n};"],
   typescript: ["interface UserProfile {\n  id: string;\n  wpm: number;\n}\nconst update = (u: UserProfile): void => console.log(u);"],
   python: ["def quicksort(arr):\n    if len(arr) <= 1: return arr\n    pivot = arr[len(arr) // 2]\n    return quicksort([x for x in arr if x < pivot]) + [x for x in arr if x == pivot] + quicksort([x for x in arr if x > pivot])"],
-  cpp: ["#include <iostream>\nint main() { std::cout << \"Hello Typerix\"; return 0; }"],
+  cpp: ["#include <iostream>\nint main() { std::cout << \"Hello Typrix\"; return 0; }"],
   java: ["public class Main { public static void main(String[] args) { System.out.println(\"Java Code\"); } }"],
-  html: ["<div className=\"flex items-center justify-between p-4 bg-slate-900\"><h1>Typerix</h1></div>"],
+  html: ["<div className=\"flex items-center justify-between p-4 bg-slate-900\"><h1>Typrix</h1></div>"],
   sql: ["SELECT users.id, MAX(tests.wpm) FROM users INNER JOIN tests ON users.id = tests.user_id GROUP BY users.id;"],
-  rust: ["fn main() { println!(\"Typerix Rust Engine\"); }"],
+  rust: ["fn main() { println!(\"Typrix Rust Engine\"); }"],
   go: ["package main\nimport \"fmt\"\nfunc main() { fmt.Println(\"Go\") }"]
 };
 
@@ -120,10 +120,10 @@ export function generateTestText(
     return EXAM_SNIPPETS[examType] || EXAM_SNIPPETS.ssc_chsl;
   }
 
-  // In TIME mode, generate 350 to 500 words so paragraph NEVER ends until the timer expires!
+  // In TIME mode, generate 450 words so paragraph NEVER ends until the timer expires!
   let targetWordCount = wordCount;
   if (mode === 'time') {
-    targetWordCount = 450; // Long continuous paragraph for time mode!
+    targetWordCount = 450;
   }
 
   let pool = [...COMMON_WORDS];
