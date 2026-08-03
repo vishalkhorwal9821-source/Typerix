@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import type { Keystroke, TestResult, TestMode, SubMode, KeyHeatmapData, FingerStat } from '../types';
+import type { Keystroke, TestResult, TestMode, SubMode, KeyHeatmapData, FingerStat, TextCategory } from '../types';
 import { soundEngine } from '../services/soundEngine';
 import { getFingerForKey } from '../services/aiCoach';
 import { Play, RotateCcw } from 'lucide-react';
@@ -8,6 +8,7 @@ interface TypingBoxProps {
   targetText: string;
   mode: TestMode;
   subMode: SubMode;
+  category: TextCategory;
   timeOption: number;
   wordOption: number;
   soundEnabled: boolean;
@@ -21,6 +22,7 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
   targetText,
   mode,
   subMode,
+  category,
   timeOption,
   wordOption,
   soundEnabled,
@@ -36,6 +38,7 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
   const [timeLeft, setTimeLeft] = useState<number>(timeOption);
   const [keystrokes, setKeystrokes] = useState<Keystroke[]>([]);
   const [errorCount, setErrorCount] = useState<number>(0);
+  const [missingCount, setMissingCount] = useState<number>(0);
   const [backspaceCount, setBackspaceCount] = useState<number>(0);
   const [liveWpm, setLiveWpm] = useState<number>(0);
   const [liveAccuracy, setLiveAccuracy] = useState<number>(100);
@@ -46,7 +49,7 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
   // Focus input automatically on mount and reset
   useEffect(() => {
     resetState();
-  }, [targetText, mode, subMode, timeOption, wordOption]);
+  }, [targetText, mode, subMode, category, timeOption, wordOption]);
 
   const resetState = () => {
     setTypedInput('');
@@ -56,6 +59,7 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
     setTimeLeft(timeOption);
     setKeystrokes([]);
     setErrorCount(0);
+    setMissingCount(0);
     setBackspaceCount(0);
     setLiveWpm(0);
     setLiveAccuracy(100);
@@ -92,7 +96,6 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
     const now = Date.now();
     const elapsedSeconds = Math.max(0.5, (now - startTime) / 1000);
 
-    // Standard WPM formula: (characters typed / 5) / (seconds / 60)
     const wpm = Math.round((typedInput.length / 5) / (elapsedSeconds / 60));
     setLiveWpm(wpm);
 
@@ -139,12 +142,20 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       const delayMs = lastKeyTimeRef.current > 0 ? now - lastKeyTimeRef.current : 0;
       lastKeyTimeRef.current = now;
 
+      // Burst WPM calculation
+      const instantWpm = delayMs > 0 ? Math.round((60000 / delayMs) / 5) : liveWpm;
+
       if (soundEnabled) {
         soundEngine.playKeyPress(!isCorrect, addedChar === ' ');
       }
 
+      let isMissingChar = false;
       if (!isCorrect) {
         setErrorCount((err) => err + 1);
+        if (addedChar === ' ' && targetChar !== ' ') {
+          isMissingChar = true;
+          setMissingCount((m) => m + 1);
+        }
       }
 
       const ks: Keystroke = {
@@ -155,6 +166,8 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
         key: addedChar,
         code: addedChar,
         delayMs,
+        instantWpm,
+        isMissing: isMissingChar,
       };
 
       setKeystrokes((prev) => [...prev, ks]);
@@ -162,7 +175,6 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
 
     setTypedInput(val);
 
-    // Check completion condition
     if (val.length >= targetText.length) {
       finishTest(val);
     }
@@ -183,7 +195,6 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
     const totalTypedWithErr = totalChars + errorCount;
     const finalAccuracy = totalTypedWithErr > 0 ? Math.round(((totalTypedWithErr - errorCount) / totalTypedWithErr) * 100) : 100;
 
-    // Generate Heatmap & Finger Stats
     const heatmap: Record<string, KeyHeatmapData> = {};
     const fingerStats: Record<string, FingerStat> = {};
 
@@ -205,7 +216,6 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       if (!ks.isCorrect) fingerStats[finger].errors += 1;
     });
 
-    // Consistency score
     let consistency = 85;
     if (keystrokes.length > 5) {
       const avgDelay = keystrokes.reduce((a, b) => a + b.delayMs, 0) / keystrokes.length;
@@ -221,6 +231,7 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       rawWpm,
       accuracy: finalAccuracy,
       errorCount,
+      missingCount,
       correctedErrors: backspaceCount,
       uncorrectedErrors: Math.max(0, errorCount - backspaceCount),
       consistency,
@@ -230,9 +241,11 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       durationSeconds: Math.round(durationSeconds),
       mode,
       subMode,
+      category,
       keystrokes,
       heatmap,
       fingerStats,
+      graphData: [],
       text: targetText,
     };
 
@@ -240,31 +253,31 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col items-center gap-6 my-6 relative">
-      {/* Live Metrics Bar */}
-      <div className="flex items-center justify-between w-full px-6 py-3 bg-slate-900/80 border border-slate-800 rounded-2xl backdrop-blur-md shadow-xl">
-        <div className="flex items-center gap-8">
+    <div className="w-full max-w-5xl mx-auto flex flex-col items-center gap-4 my-2 relative">
+      {/* Compact Live Metrics Bar */}
+      <div className="flex items-center justify-between w-full px-5 py-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl backdrop-blur-md shadow-xl">
+        <div className="flex items-center gap-6">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">SPEED</span>
+            <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">NET WPM</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-cyan-400 font-mono tracking-tight">{liveWpm}</span>
-              <span className="text-xs font-bold text-cyan-500/80">WPM</span>
+              <span className="text-2xl font-black text-cyan-400 font-mono tracking-tight">{liveWpm}</span>
+              <span className="text-[10px] font-bold text-cyan-500/80">WPM</span>
             </div>
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">ACCURACY</span>
+            <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">ACCURACY</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-emerald-400 font-mono tracking-tight">{liveAccuracy}%</span>
+              <span className="text-2xl font-black text-emerald-400 font-mono tracking-tight">{liveAccuracy}%</span>
             </div>
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">
-              {mode === 'time' ? 'TIME REMAINING' : 'CHARACTERS'}
+            <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">
+              {mode === 'time' ? 'REMAINING' : 'PROGRESS'}
             </span>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-indigo-400 font-mono tracking-tight">
+              <span className="text-2xl font-black text-indigo-400 font-mono tracking-tight">
                 {mode === 'time' ? `${timeLeft}s` : `${typedInput.length}/${targetText.length}`}
               </span>
             </div>
@@ -277,10 +290,10 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
               resetState();
               onResetText();
             }}
-            className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center gap-2 text-xs font-semibold transition-all shadow-md active:scale-95"
+            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center gap-1.5 text-xs font-semibold transition-all shadow-md active:scale-95"
             title="Restart Test (Tab)"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5" />
             <span>Restart</span>
           </button>
         </div>
@@ -289,8 +302,8 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       {/* Main Text Typing View Box */}
       <div
         onClick={() => inputRef.current?.focus()}
-        className={`w-full min-h-[220px] max-h-[340px] overflow-y-auto p-8 rounded-3xl bg-slate-950/80 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all ${
-          dyslexicFont ? 'font-sans text-xl leading-relaxed tracking-wide' : 'font-mono text-2xl leading-relaxed tracking-normal'
+        className={`w-full min-h-[180px] max-h-[280px] overflow-y-auto p-6 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all ${
+          dyslexicFont ? 'font-sans text-lg leading-relaxed tracking-wide' : 'font-mono text-xl leading-relaxed tracking-normal'
         }`}
       >
         {/* Eye Focus Mode Blur Mask */}
@@ -332,8 +345,8 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
         {/* Click to focus hint overlay */}
         {!isStarted && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs rounded-3xl pointer-events-none">
-            <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm font-semibold shadow-lg animate-bounce">
-              <Play className="w-4 h-4 fill-cyan-400 text-cyan-400" />
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold shadow-lg animate-bounce">
+              <Play className="w-3.5 h-3.5 fill-cyan-400 text-cyan-400" />
               <span>Click here or start typing to begin</span>
             </div>
           </div>

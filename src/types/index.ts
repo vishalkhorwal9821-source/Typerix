@@ -1,10 +1,12 @@
-export type TestMode = 'time' | 'words' | 'quote' | 'code' | 'zen' | 'exam' | 'custom' | 'rpg' | 'ghost';
+export type TestMode = 'time' | 'words' | 'quote' | 'code' | 'category' | 'zen' | 'exam' | 'custom' | 'rpg' | 'ghost';
 export type SubMode = 'normal' | 'numbers' | 'symbols' | 'mixed' | 'blind';
+
+export type TextCategory = 'general' | 'code' | 'science' | 'history' | 'exams' | 'medical' | 'anime' | 'quotes';
 
 export type TimeOption = 15 | 30 | 60 | 120;
 export type WordOption = 10 | 25 | 50 | 100 | 250;
-export type CodeLanguage = 'javascript' | 'python' | 'cpp' | 'java' | 'html' | 'sql';
-export type ExamType = 'ssc_chsl' | 'banking_ibps' | 'court_clerk' | 'steno';
+export type CodeLanguage = 'javascript' | 'typescript' | 'python' | 'cpp' | 'java' | 'html' | 'sql' | 'rust' | 'go';
+export type ExamType = 'ssc_chsl' | 'banking_ibps' | 'court_clerk' | 'steno' | 'upsc' | 'gate';
 
 export interface Keystroke {
   char: string;
@@ -14,6 +16,8 @@ export interface Keystroke {
   key: string;
   code: string;
   delayMs: number;
+  instantWpm: number; // Burst speed
+  isMissing?: boolean;
 }
 
 export interface KeyHeatmapData {
@@ -23,10 +27,19 @@ export interface KeyHeatmapData {
 }
 
 export interface FingerStat {
-  finger: string; // 'left-pinky' | 'left-ring' | 'left-middle' | 'left-index' | 'thumb' | 'right-index' | 'right-middle' | 'right-ring' | 'right-pinky'
+  finger: string;
   count: number;
   errors: number;
   totalTimeMs: number;
+}
+
+export interface GraphDataPoint {
+  second: number;
+  wpm: number;
+  rawWpm: number;
+  burstWpm: number;
+  errorCount: number;
+  missingCount: number;
 }
 
 export interface TestResult {
@@ -36,6 +49,7 @@ export interface TestResult {
   rawWpm: number;
   accuracy: number;
   errorCount: number;
+  missingCount: number;
   correctedErrors: number;
   uncorrectedErrors: number;
   consistency: number;
@@ -45,9 +59,11 @@ export interface TestResult {
   durationSeconds: number;
   mode: TestMode;
   subMode: SubMode;
+  category: TextCategory;
   keystrokes: Keystroke[];
   heatmap: Record<string, KeyHeatmapData>;
   fingerStats: Record<string, FingerStat>;
+  graphData: GraphDataPoint[];
   text: string;
 }
 
