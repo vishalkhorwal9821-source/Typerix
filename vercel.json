@@ -1,26 +1,8 @@
 {
-  "routes": [
+  "rewrites": [
     {
-      "src": "/sitemap.xml",
-      "dest": "/sitemap.xml",
-      "headers": {
-        "Content-Type": "application/xml; charset=utf-8"
-      }
-    },
-    {
-      "src": "/robots.txt",
-      "dest": "/robots.txt",
-      "headers": {
-        "Content-Type": "text/plain; charset=utf-8"
-      }
-    },
-    {
-      "src": "/google7321a76c755defc3.html",
-      "dest": "/google7321a76c755defc3.html"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/index.html"
+      "source": "/((?!assets/|sitemap\\.xml|robots\\.txt|google.*\\.html|favicon\\.ico).*)",
+      "destination": "/index.html"
     }
   ]
 }
