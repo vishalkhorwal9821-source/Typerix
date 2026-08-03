@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { KeyHeatmapData } from '../types';
+import { Keyboard, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface VirtualKeyboardProps {
   activeKey?: string;
@@ -40,6 +41,7 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   showHeatmap = false,
 }) => {
   const [layout, setLayout] = useState<'QWERTY' | 'Dvorak' | 'Colemak'>('QWERTY');
+  const [isMobileExpanded, setIsMobileExpanded] = useState<boolean>(false);
 
   const getKeyHeatmapColor = (key: string) => {
     if (!showHeatmap) return '';
@@ -56,23 +58,39 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   return (
     <div className="w-full p-3 sm:p-5 bg-slate-950/90 border border-slate-800 rounded-3xl backdrop-blur-xl shadow-2xl flex flex-col gap-3 overflow-hidden">
       {/* Keyboard Header Controls */}
-      <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] sm:text-xs font-semibold text-slate-400">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-slate-500">LAYOUT:</span>
-          {(['QWERTY', 'Dvorak', 'Colemak'] as const).map((l) => (
-            <button
-              key={l}
-              onClick={() => setLayout(l)}
-              className={`px-2 py-0.5 rounded-lg transition-all ${
-                layout === l ? 'bg-cyan-500/20 text-cyan-400 font-bold' : 'text-slate-500 hover:text-slate-300'
-              }`}
-            >
-              {l}
-            </button>
-          ))}
+      <div className="flex items-center justify-between gap-2 px-1 text-[11px] sm:text-xs font-semibold text-slate-400">
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 text-slate-300 font-bold">
+            <Keyboard className="w-4 h-4 text-cyan-400" />
+            <span>Virtual Keyboard</span>
+          </div>
+
+          {/* Layout Pills */}
+          <div className="hidden sm:flex items-center gap-1 border-l border-slate-800 pl-2">
+            {(['QWERTY', 'Dvorak', 'Colemak'] as const).map((l) => (
+              <button
+                key={l}
+                onClick={() => setLayout(l)}
+                className={`px-2 py-0.5 rounded-lg transition-all ${
+                  layout === l ? 'bg-cyan-500/20 text-cyan-400 font-bold' : 'text-slate-500 hover:text-slate-300'
+                }`}
+              >
+                {l}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Mobile Toggle Button */}
+        <button
+          onClick={() => setIsMobileExpanded(!isMobileExpanded)}
+          className="sm:hidden px-2.5 py-1 rounded-xl bg-slate-900 border border-slate-800 text-cyan-400 text-[10px] font-bold flex items-center gap-1"
+        >
+          <span>{isMobileExpanded ? 'Hide Layout' : 'View Layout'}</span>
+          {isMobileExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+        </button>
+
+        <div className="hidden sm:flex items-center gap-2">
           <span className="flex items-center gap-1">
             <span className="w-2 h-2 rounded-full bg-cyan-400" />
             <span>Active</span>
@@ -84,8 +102,8 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
         </div>
       </div>
 
-      {/* Keyboard Key Grid - Touch Scrollable on Mobile */}
-      <div className="overflow-x-auto pb-1">
+      {/* Keyboard Key Grid - Visible by default on Desktop, Collapsible on Phone */}
+      <div className={`${isMobileExpanded ? 'block' : 'hidden sm:block'} overflow-x-auto pb-1`}>
         <div className="min-w-[640px] md:min-w-0 flex flex-col gap-1.5 p-2 bg-slate-900/70 border border-slate-800/80 rounded-2xl">
           {QWERTY_ROWS.map((row, rowIndex) => (
             <div key={rowIndex} className="flex justify-center gap-1 sm:gap-1.5">

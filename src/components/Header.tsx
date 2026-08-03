@@ -73,29 +73,29 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenCustomModal,
 }) => {
   return (
-    <header className="w-full max-w-[1700px] mx-auto pt-3 pb-2 px-3 sm:px-6 flex flex-col gap-2.5">
+    <header className="w-full max-w-[1700px] mx-auto pt-2 sm:pt-4 pb-2 px-2.5 sm:px-6 flex flex-col gap-2">
       {/* Top Navbar */}
-      <div className="flex flex-wrap items-center justify-between gap-2.5 border-b border-cyan-500/20 pb-2.5">
+      <div className="flex items-center justify-between gap-2 border-b border-cyan-500/20 pb-2">
         {/* Brand Logo */}
-        <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => setMode('time')}>
-          <div className="relative w-8 sm:w-9 h-8 sm:h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-all">
-            <Zap className="w-4 sm:w-5 h-4 sm:h-5 text-white animate-pulse" />
+        <div className="flex items-center gap-2 cursor-pointer group shrink-0" onClick={() => setMode('time')}>
+          <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-cyan-500/20">
+            <Zap className="w-3.5 h-3.5 sm:w-5 sm:h-5 text-white animate-pulse" />
           </div>
           <div>
-            <h1 className="text-lg sm:text-xl font-black tracking-wider bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
+            <h1 className="text-base sm:text-xl font-black tracking-wider bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
               TYPERIX
             </h1>
-            <p className="text-[9px] text-cyan-400/60 font-mono tracking-widest hidden sm:block">WORLD'S BEST AI TYPING PLATFORM</p>
+            <p className="text-[9px] text-cyan-400/60 font-mono tracking-widest hidden md:block">WORLD'S BEST AI TYPING PLATFORM</p>
           </div>
         </div>
 
         {/* Action Controls & RPG Profile Pill */}
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* Quick Settings Toggles */}
-          <div className="flex items-center gap-1 bg-slate-900/80 border border-slate-800 rounded-xl p-1 shadow-inner">
+          <div className="flex items-center gap-0.5 sm:gap-1 bg-slate-900/90 border border-slate-800 rounded-xl p-1 shadow-inner">
             <button
               onClick={() => setSoundEnabled(!soundEnabled)}
-              title={soundEnabled ? 'Mute Sounds' : 'Enable Mechanical Key Sounds'}
+              title={soundEnabled ? 'Mute Sounds' : 'Enable Key Sounds'}
               className={`p-1.5 rounded-lg transition-all ${
                 soundEnabled ? 'bg-cyan-500/20 text-cyan-400' : 'text-slate-500 hover:text-slate-300'
               }`}
@@ -125,137 +125,126 @@ export const Header: React.FC<HeaderProps> = ({
 
             <button
               onClick={onOpenAiCoach}
-              className="px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 text-cyan-300 border border-cyan-500/30 hover:border-cyan-400 flex items-center gap-1 text-[11px] font-semibold transition-all shadow-sm"
+              className="px-2 py-1 rounded-lg bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 text-cyan-300 border border-cyan-500/30 flex items-center gap-1 text-[10px] sm:text-xs font-semibold shadow-sm"
             >
-              <Bot className="w-3.5 h-3.5 text-cyan-400" />
-              <span>AI Coach</span>
+              <Bot className="w-3 h-3 text-cyan-400" />
+              <span className="hidden xs:inline">AI Coach</span>
             </button>
           </div>
 
           {/* User RPG Level Badge */}
           <div
             onClick={onOpenRpg}
-            className="flex items-center gap-2 bg-gradient-to-r from-slate-900 to-indigo-950/80 border border-cyan-500/30 rounded-xl px-2.5 py-1 cursor-pointer hover:border-cyan-400 transition-all shadow-lg group"
+            className="flex items-center gap-1.5 sm:gap-2 bg-gradient-to-r from-slate-900 to-indigo-950/80 border border-cyan-500/30 rounded-xl px-2 py-1 cursor-pointer shadow-lg"
           >
-            <div className="flex items-center gap-1.5">
-              <span className="w-4 sm:w-5 h-4 sm:h-5 rounded-full bg-cyan-500/20 text-cyan-300 font-bold text-[9px] sm:text-[10px] flex items-center justify-center border border-cyan-400/40">
-                {profile.level}
-              </span>
-              <div className="flex flex-col">
-                <span className="text-[11px] sm:text-xs font-bold text-slate-200 group-hover:text-cyan-300 transition-colors">
-                  Lvl {profile.level}
-                </span>
-                <span className="text-[8px] sm:text-[9px] text-cyan-400/70 font-mono">
-                  {profile.xp}/{profile.nextLevelXp} XP
-                </span>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 px-1.5 py-0.5 rounded-lg">
-              <Coins className="w-3 h-3 text-amber-400" />
-              <span className="text-[11px] font-bold text-amber-300">{profile.coins}</span>
+            <span className="w-4 sm:w-5 h-4 sm:h-5 rounded-full bg-cyan-500/20 text-cyan-300 font-bold text-[9px] sm:text-[10px] flex items-center justify-center border border-cyan-400/40">
+              {profile.level}
+            </span>
+            <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 px-1 py-0.5 rounded-lg">
+              <Coins className="w-2.5 sm:w-3 h-2.5 sm:h-3 text-amber-400" />
+              <span className="text-[10px] sm:text-xs font-bold text-amber-300">{profile.coins}</span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Mode & Category Toolbar - Responsive Touch Scrollable on Mobile */}
-      <div className="flex flex-wrap items-center justify-between gap-2 bg-slate-900/60 border border-slate-800/80 rounded-2xl p-1.5 backdrop-blur-md overflow-x-auto">
+      {/* Mode & Category Toolbar - Responsive Scrollable Bar */}
+      <div className="flex items-center justify-between gap-2 bg-slate-900/80 border border-slate-800/80 rounded-2xl p-1 backdrop-blur-md overflow-x-auto whitespace-nowrap">
         {/* Main Test Modes */}
-        <div className="flex items-center flex-nowrap sm:flex-wrap gap-1 min-w-max">
+        <div className="flex items-center gap-1 min-w-max">
           <button
             onClick={() => setMode('time')}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'time' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Clock className="w-3.5 h-3.5" />
+            <Clock className="w-3 h-3" />
             <span>Time</span>
           </button>
 
           <button
             onClick={() => setMode('words')}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'words' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <FileText className="w-3.5 h-3.5" />
+            <FileText className="w-3 h-3" />
             <span>Words</span>
           </button>
 
           <button
             onClick={() => setMode('article')}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'article' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Layers className="w-3.5 h-3.5" />
+            <Layers className="w-3 h-3" />
             <span>Articles</span>
           </button>
 
           <button
             onClick={() => setMode('category')}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'category' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <BookOpen className="w-3.5 h-3.5" />
+            <BookOpen className="w-3 h-3" />
             <span>Categories</span>
           </button>
 
           <button
             onClick={() => setMode('quote')}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'quote' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <QuoteIcon className="w-3.5 h-3.5" />
+            <QuoteIcon className="w-3 h-3" />
             <span>Quote</span>
           </button>
 
           <button
             onClick={() => setMode('code')}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'code' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Code className="w-3.5 h-3.5" />
+            <Code className="w-3 h-3" />
             <span>Code</span>
           </button>
 
           <button
             onClick={() => setMode('ghost')}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'ghost' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Ghost className="w-3.5 h-3.5" />
+            <Ghost className="w-3 h-3" />
             <span>Ghost</span>
           </button>
 
           <button
             onClick={() => setMode('exam')}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'exam' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Award className="w-3.5 h-3.5" />
+            <Award className="w-3 h-3" />
             <span>Exams</span>
           </button>
 
           <button
             onClick={onOpenCustomModal}
-            className={`px-2.5 py-1 rounded-xl text-xs font-semibold flex items-center gap-1 transition-all ${
+            className={`px-2.5 py-1 rounded-xl text-[11px] sm:text-xs font-semibold flex items-center gap-1 transition-all ${
               mode === 'custom' ? 'bg-cyan-500 text-slate-950 font-bold shadow-md' : 'text-slate-400 hover:text-white'
             }`}
           >
-            <Sparkles className="w-3.5 h-3.5" />
+            <Sparkles className="w-3 h-3" />
             <span>PDF</span>
           </button>
         </div>
 
         {/* Sub Option Selectors */}
-        <div className="flex items-center gap-1 bg-slate-950/80 p-1 rounded-xl text-[11px] font-mono min-w-max">
+        <div className="flex items-center gap-1 bg-slate-950/80 p-0.5 rounded-xl text-[10px] sm:text-[11px] font-mono min-w-max">
           {mode === 'article' && (
             <>
               {(['easy', 'medium', 'hard'] as DifficultyLevel[]).map((d) => (
