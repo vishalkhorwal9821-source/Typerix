@@ -284,42 +284,40 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-4 my-2 relative">
-      {/* Live Metrics Bar */}
-      <div className="flex items-center justify-between w-full px-6 py-3 bg-slate-900/90 border border-slate-800 rounded-2xl backdrop-blur-md shadow-xl">
-        <div className="flex items-center gap-8">
+    <div className="w-full flex flex-col items-center gap-3 my-1 relative">
+      {/* Responsive Live Metrics Bar */}
+      <div className="flex flex-wrap items-center justify-between w-full px-4 sm:px-6 py-2.5 sm:py-3 bg-slate-900/90 border border-slate-800 rounded-2xl backdrop-blur-md shadow-xl gap-2">
+        <div className="flex items-center gap-4 sm:gap-8">
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">NET WPM</span>
+            <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-slate-400">NET WPM</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-cyan-400 font-mono tracking-tight">{liveWpm}</span>
-              <span className="text-xs font-bold text-cyan-500/80">WPM</span>
+              <span className="text-2xl sm:text-3xl font-black text-cyan-400 font-mono tracking-tight">{liveWpm}</span>
+              <span className="text-[10px] sm:text-xs font-bold text-cyan-500/80">WPM</span>
             </div>
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">ACCURACY</span>
+            <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-slate-400">ACCURACY</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-emerald-400 font-mono tracking-tight">{liveAccuracy}%</span>
+              <span className="text-2xl sm:text-3xl font-black text-emerald-400 font-mono tracking-tight">{liveAccuracy}%</span>
             </div>
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">
+            <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-slate-400">
               {mode === 'time' ? 'REMAINING' : 'PROGRESS'}
             </span>
             <div className="flex items-baseline gap-1">
-              <span className="text-3xl font-black text-indigo-400 font-mono tracking-tight">
+              <span className="text-2xl sm:text-3xl font-black text-indigo-400 font-mono tracking-tight">
                 {mode === 'time' ? `${timeLeft}s` : `${typedInput.length}/${targetText.length}`}
               </span>
             </div>
           </div>
 
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">ERRORS / MISSING</span>
+          <div className="flex flex-col hidden xs:flex">
+            <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-slate-400">ERRORS</span>
             <div className="flex items-baseline gap-1 font-mono">
-              <span className="text-xl font-bold text-rose-400">{errorCount}</span>
-              <span className="text-slate-500">/</span>
-              <span className="text-xl font-bold text-amber-400">{missingCount}</span>
+              <span className="text-lg sm:text-xl font-bold text-rose-400">{errorCount}</span>
             </div>
           </div>
         </div>
@@ -330,10 +328,10 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
               resetState();
               onResetText();
             }}
-            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center gap-2 text-xs font-semibold transition-all shadow-md active:scale-95"
+            className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center gap-1.5 text-xs font-semibold transition-all shadow-md active:scale-95"
             title="Restart Test (Tab)"
           >
-            <RotateCcw className="w-4 h-4" />
+            <RotateCcw className="w-3.5 h-3.5" />
             <span>Restart</span>
           </button>
         </div>
@@ -343,8 +341,8 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       <div
         ref={containerRef}
         onClick={() => inputRef.current?.focus()}
-        className={`w-full h-[260px] overflow-y-auto p-8 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all scroll-smooth ${
-          dyslexicFont ? 'font-sans text-xl leading-relaxed tracking-wide' : 'font-mono text-2xl leading-relaxed tracking-normal'
+        className={`w-full h-[200px] sm:h-[260px] overflow-y-auto p-4 sm:p-8 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all scroll-smooth ${
+          dyslexicFont ? 'font-sans text-lg sm:text-xl leading-relaxed tracking-wide' : 'font-mono text-lg sm:text-2xl leading-relaxed tracking-normal'
         }`}
       >
         {/* Eye Focus Mode Blur Mask */}
@@ -389,10 +387,10 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
 
         {/* Click to focus hint overlay */}
         {!isStarted && (
-          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs rounded-3xl pointer-events-none">
-            <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm font-semibold shadow-lg animate-bounce">
-              <Play className="w-4 h-4 fill-cyan-400 text-cyan-400" />
-              <span>Click here or start typing to begin</span>
+          <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs rounded-3xl pointer-events-none p-4">
+            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs sm:text-sm font-semibold shadow-lg animate-bounce text-center">
+              <Play className="w-3.5 h-3.5 fill-cyan-400 text-cyan-400 shrink-0" />
+              <span>Click or start typing to begin</span>
             </div>
           </div>
         )}

@@ -54,16 +54,16 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-5 bg-slate-950/90 border border-slate-800 rounded-3xl backdrop-blur-xl shadow-2xl flex flex-col gap-3">
+    <div className="w-full p-3 sm:p-5 bg-slate-950/90 border border-slate-800 rounded-3xl backdrop-blur-xl shadow-2xl flex flex-col gap-3 overflow-hidden">
       {/* Keyboard Header Controls */}
-      <div className="flex items-center justify-between px-2 text-xs font-semibold text-slate-400">
-        <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase font-mono tracking-widest text-slate-500">LAYOUT:</span>
+      <div className="flex flex-wrap items-center justify-between gap-2 px-1 text-[11px] sm:text-xs font-semibold text-slate-400">
+        <div className="flex items-center gap-1.5">
+          <span className="text-[9px] sm:text-[10px] uppercase font-mono tracking-widest text-slate-500">LAYOUT:</span>
           {(['QWERTY', 'Dvorak', 'Colemak'] as const).map((l) => (
             <button
               key={l}
               onClick={() => setLayout(l)}
-              className={`px-2.5 py-1 rounded-lg transition-all ${
+              className={`px-2 py-0.5 rounded-lg transition-all ${
                 layout === l ? 'bg-cyan-500/20 text-cyan-400 font-bold' : 'text-slate-500 hover:text-slate-300'
               }`}
             >
@@ -72,54 +72,56 @@ export const VirtualKeyboard: React.FC<VirtualKeyboardProps> = ({
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-cyan-400" />
-            <span>Active Key</span>
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-cyan-400" />
+            <span>Active</span>
           </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-            <span>High Errors</span>
+          <span className="flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-rose-500" />
+            <span>Errors</span>
           </span>
         </div>
       </div>
 
-      {/* Keyboard Key Grid */}
-      <div className="flex flex-col gap-1.5 p-2 bg-slate-900/70 border border-slate-800/80 rounded-2xl">
-        {QWERTY_ROWS.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex justify-center gap-1.5">
-            {row.map((key) => {
-              const isSpace = key === 'Space';
-              const isWide = ['Backspace', 'Tab', 'Caps', 'Enter', 'Shift'].includes(key);
-              const isActive = activeKey && activeKey.toLowerCase() === key.toLowerCase();
-              const heatmapStyle = getKeyHeatmapColor(key);
+      {/* Keyboard Key Grid - Touch Scrollable on Mobile */}
+      <div className="overflow-x-auto pb-1">
+        <div className="min-w-[640px] md:min-w-0 flex flex-col gap-1.5 p-2 bg-slate-900/70 border border-slate-800/80 rounded-2xl">
+          {QWERTY_ROWS.map((row, rowIndex) => (
+            <div key={rowIndex} className="flex justify-center gap-1 sm:gap-1.5">
+              {row.map((key) => {
+                const isSpace = key === 'Space';
+                const isWide = ['Backspace', 'Tab', 'Caps', 'Enter', 'Shift'].includes(key);
+                const isActive = activeKey && activeKey.toLowerCase() === key.toLowerCase();
+                const heatmapStyle = getKeyHeatmapColor(key);
 
-              return (
-                <div
-                  key={key}
-                  className={`relative flex items-center justify-center rounded-xl text-xs font-mono font-bold transition-all shadow-md select-none border ${
-                    isSpace
-                      ? 'w-72 h-11'
-                      : isWide
-                      ? 'w-16 h-11'
-                      : 'w-10 h-11'
-                  } ${
-                    isActive
-                      ? 'bg-gradient-to-t from-cyan-500 to-indigo-500 text-slate-950 border-cyan-300 shadow-[0_0_15px_#22d3ee] scale-105 z-10'
-                      : heatmapStyle || FINGER_COLORS[key.toLowerCase()] || 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'
-                  }`}
-                >
-                  {key}
-                  {showHeatmap && heatmapData[key.toLowerCase()] && (
-                    <span className="absolute bottom-0.5 right-1 text-[8px] opacity-70">
-                      {heatmapData[key.toLowerCase()].count}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        ))}
+                return (
+                  <div
+                    key={key}
+                    className={`relative flex items-center justify-center rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-mono font-bold transition-all shadow-md select-none border ${
+                      isSpace
+                        ? 'w-48 sm:w-72 h-9 sm:h-11'
+                        : isWide
+                        ? 'w-12 sm:w-16 h-9 sm:h-11'
+                        : 'w-7 sm:w-10 h-9 sm:h-11'
+                    } ${
+                      isActive
+                        ? 'bg-gradient-to-t from-cyan-500 to-indigo-500 text-slate-950 border-cyan-300 shadow-[0_0_15px_#22d3ee] scale-105 z-10'
+                        : heatmapStyle || FINGER_COLORS[key.toLowerCase()] || 'bg-slate-900 text-slate-300 border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    {key}
+                    {showHeatmap && heatmapData[key.toLowerCase()] && (
+                      <span className="absolute bottom-0.5 right-1 text-[7px] sm:text-[8px] opacity-70">
+                        {heatmapData[key.toLowerCase()].count}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
