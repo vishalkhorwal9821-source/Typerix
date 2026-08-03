@@ -6,6 +6,25 @@ const STORAGE_KEYS = {
   QUESTS: 'typerix_daily_quests',
 };
 
+// Cookie persistence helpers
+function setCookie(name: string, value: string, days: number = 365) {
+  try {
+    const expires = new Date(Date.now() + days * 864e5).toUTCString();
+    document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; SameSite=Strict`;
+  } catch {
+    // Cookie fallback
+  }
+}
+
+function getCookie(name: string): string | null {
+  try {
+    const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+    return match ? decodeURIComponent(match[2]) : null;
+  } catch {
+    return null;
+  }
+}
+
 const DEFAULT_PROFILE: UserProfile = {
   username: 'Typing Wizard',
   title: 'Novice Finger-Smith',
@@ -71,9 +90,33 @@ const DEFAULT_QUESTS: Quest[] = [
 
 export function getUserProfile(): UserProfile {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.PROFILE);
+    // 1. Try LocalStorage
+    let raw = localStorage.getItem(STORAGE_KEYS.PROFILE);
+    // 2. Try SessionStorage
+    if (!raw) raw = sessionStorage.getItem(STORAGE_KEYS.PROFILE);
+    // 3. Try Cookies
+    if (!raw) raw = getCookie(STORAGE_KEYS.PROFILE);
+
     if (!raw) return DEFAULT_PROFILE;
-    return { ...DEFAULT_PROFILE, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw);
+
+    // Update streak date logic
+    const today = new Date().toISOString().split('T')[0];
+    if (parsed.lastActiveDate !== today) {
+      const lastDate = new Date(parsed.lastActiveDate);
+      const currentDate = new Date(today);
+      const diffDays = Math.round((currentDate.getTime() - lastDate.getTime()) / (1000 * 3600 * 24));
+
+      if (diffDays === 1) {
+        parsed.streakDays += 1;
+      } else if (diffDays > 1) {
+        parsed.streakDays = 1;
+      }
+      parsed.lastActiveDate = today;
+      saveUserProfile(parsed);
+    }
+
+    return { ...DEFAULT_PROFILE, ...parsed };
   } catch {
     return DEFAULT_PROFILE;
   }
@@ -81,15 +124,21 @@ export function getUserProfile(): UserProfile {
 
 export function saveUserProfile(profile: UserProfile): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.PROFILE, JSON.stringify(profile));
+    const jsonStr = JSON.stringify(profile);
+    localStorage.setItem(STORAGE_KEYS.PROFILE, jsonStr);
+    sessionStorage.setItem(STORAGE_KEYS.PROFILE, jsonStr);
+    setCookie(STORAGE_KEYS.PROFILE, jsonStr, 365);
   } catch {
-    // LocalStorage quota fallback
+    // Storage quota fallback
   }
 }
 
 export function getTestHistory(): TestResult[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.HISTORY);
+    let raw = localStorage.getItem(STORAGE_KEYS.HISTORY);
+    if (!raw) raw = sessionStorage.getItem(STORAGE_KEYS.HISTORY);
+    if (!raw) raw = getCookie(STORAGE_KEYS.HISTORY);
+
     if (!raw) return [];
     return JSON.parse(raw);
   } catch {
@@ -101,12 +150,14 @@ export function saveTestResult(result: TestResult): { updatedProfile: UserProfil
   const history = getTestHistory();
   history.unshift(result);
   try {
-    localStorage.setItem(STORAGE_KEYS.HISTORY, JSON.stringify(history.slice(0, 100)));
+    const jsonStr = JSON.stringify(history.slice(0, 100));
+    localStorage.setItem(STORAGE_KEYS.HISTORY, jsonStr);
+    sessionStorage.setItem(STORAGE_KEYS.HISTORY, jsonStr);
+    setCookie(STORAGE_KEYS.HISTORY, jsonStr, 365);
   } catch {
     // ignore
   }
 
-  // Calculate XP & Level gains
   const profile = getUserProfile();
   let earnedXp = Math.round(result.wpm * 1.5 + (result.accuracy > 95 ? 30 : 10) + result.characterCount / 5);
   let earnedCoins = Math.round(result.wpm / 10 + (result.accuracy >= 98 ? 15 : 5));
@@ -115,15 +166,13 @@ export function saveTestResult(result: TestResult): { updatedProfile: UserProfil
   profile.totalCharactersTyped += result.characterCount;
   profile.totalTimeTypedSeconds += result.durationSeconds;
 
-  // Personal Best update
   const key = `${result.mode}_${result.durationSeconds || 'def'}`;
   if (!profile.personalBests[key] || result.wpm > profile.personalBests[key]) {
     profile.personalBests[key] = Math.round(result.wpm);
-    earnedXp += 50; // Bonus for PB!
+    earnedXp += 50;
     earnedCoins += 25;
   }
 
-  // Level Up Check
   let xp = profile.xp + earnedXp;
   let level = profile.level;
   let nextLevelXp = profile.nextLevelXp;
@@ -137,7 +186,6 @@ export function saveTestResult(result: TestResult): { updatedProfile: UserProfil
     earnedCoins += 100;
   }
 
-  // IQ score update
   profile.iqScore = Math.min(180, Math.max(70, Math.round(profile.iqScore * 0.95 + (result.wpm * 0.6 + result.accuracy * 0.4) * 0.05)));
 
   profile.xp = xp;
@@ -145,7 +193,6 @@ export function saveTestResult(result: TestResult): { updatedProfile: UserProfil
   profile.nextLevelXp = nextLevelXp;
   profile.coins += earnedCoins;
 
-  // Update Quests
   const quests = getQuests();
   quests.forEach((q) => {
     if (q.id === 'q_daily_3tests') q.progress = Math.min(q.target, q.progress + 1);
@@ -163,7 +210,10 @@ export function saveTestResult(result: TestResult): { updatedProfile: UserProfil
 
 export function getQuests(): Quest[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEYS.QUESTS);
+    let raw = localStorage.getItem(STORAGE_KEYS.QUESTS);
+    if (!raw) raw = sessionStorage.getItem(STORAGE_KEYS.QUESTS);
+    if (!raw) raw = getCookie(STORAGE_KEYS.QUESTS);
+
     if (!raw) return DEFAULT_QUESTS;
     return JSON.parse(raw);
   } catch {
@@ -173,7 +223,10 @@ export function getQuests(): Quest[] {
 
 export function saveQuests(quests: Quest[]): void {
   try {
-    localStorage.setItem(STORAGE_KEYS.QUESTS, JSON.stringify(quests));
+    const jsonStr = JSON.stringify(quests);
+    localStorage.setItem(STORAGE_KEYS.QUESTS, jsonStr);
+    sessionStorage.setItem(STORAGE_KEYS.QUESTS, jsonStr);
+    setCookie(STORAGE_KEYS.QUESTS, jsonStr, 365);
   } catch {
     // ignore
   }

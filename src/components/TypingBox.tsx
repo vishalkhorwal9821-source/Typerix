@@ -70,13 +70,17 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
     }
   };
 
-  // Auto-scroll active caret line into center of view
+  // Scroll ONLY the text box container (never jumping the outer page window)
   useEffect(() => {
-    if (activeCaretRef.current) {
-      activeCaretRef.current.scrollIntoView({
+    if (activeCaretRef.current && containerRef.current) {
+      const container = containerRef.current;
+      const caret = activeCaretRef.current;
+      const caretTop = caret.offsetTop;
+      const containerHeight = container.clientHeight;
+
+      container.scrollTo({
+        top: Math.max(0, caretTop - containerHeight / 2 + 15),
         behavior: 'smooth',
-        block: 'center',
-        inline: 'nearest',
       });
     }
   }, [typedInput.length]);
@@ -335,11 +339,11 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
         </div>
       </div>
 
-      {/* Main Text Typing View Box */}
+      {/* Container-Scoped Scrollable Text Typing View Box */}
       <div
         ref={containerRef}
         onClick={() => inputRef.current?.focus()}
-        className={`w-full min-h-[220px] max-h-[340px] overflow-y-auto p-8 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all ${
+        className={`w-full h-[260px] overflow-y-auto p-8 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all scroll-smooth ${
           dyslexicFont ? 'font-sans text-xl leading-relaxed tracking-wide' : 'font-mono text-2xl leading-relaxed tracking-normal'
         }`}
       >
