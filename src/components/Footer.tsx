@@ -13,7 +13,7 @@ export const Footer: React.FC = () => {
               <Zap className="w-4 h-4 text-white animate-pulse" />
             </div>
             <span className="text-xl font-black tracking-wider bg-gradient-to-r from-cyan-400 via-indigo-300 to-purple-400 bg-clip-text text-transparent">
-              TYPERIX
+              TYPRIX
             </span>
             <span className="px-2 py-0.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-[10px] font-mono text-cyan-400 font-bold">
               v1.0.0
@@ -21,7 +21,7 @@ export const Footer: React.FC = () => {
           </div>
 
           <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-lg">
-            Typerix is a modern online typing platform built to help users improve typing speed, accuracy, and consistency through interactive typing tests, personalized practice, coding challenges, and detailed performance analytics.
+            Typrix is a modern online typing platform built to help users improve typing speed, accuracy, and consistency through interactive typing tests, personalized practice, coding challenges, and detailed performance analytics.
           </p>
 
           <div className="flex items-center gap-1.5 text-xs text-slate-400 font-mono">
@@ -103,7 +103,7 @@ export const Footer: React.FC = () => {
       {/* Lower Copyright Line */}
       <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-900 pt-5 text-xs text-slate-400 font-mono">
         <div>
-          <p>© 2026 Typerix. All Rights Reserved.</p>
+          <p>© 2026 Typrix. All Rights Reserved.</p>
         </div>
 
         <div className="flex items-center gap-1">
