@@ -46,7 +46,6 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const lastKeyTimeRef = useRef<number>(0);
 
-  // Focus input automatically on mount and reset
   useEffect(() => {
     resetState();
   }, [targetText, mode, subMode, category, timeOption, wordOption]);
@@ -89,20 +88,29 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
     };
   }, [isStarted, isFinished, mode]);
 
-  // Live Metrics calculation hook
+  // Precise Live WPM & Accuracy calculation hook
   useEffect(() => {
     if (!isStarted || !startTime || typedInput.length === 0) return;
 
     const now = Date.now();
-    const elapsedSeconds = Math.max(0.5, (now - startTime) / 1000);
+    const elapsedMinutes = Math.max(0.01, (now - startTime) / 60000);
 
-    const wpm = Math.round((typedInput.length / 5) / (elapsedSeconds / 60));
-    setLiveWpm(wpm);
+    let correctChars = 0;
+    for (let i = 0; i < typedInput.length; i++) {
+      if (typedInput[i] === targetText[i]) {
+        correctChars += 1;
+      }
+    }
 
-    const totalTyped = typedInput.length + errorCount;
+    // Standard Net WPM formula: Net WPM = ( (Correct Chars / 5) - (Uncorrected Errors * 0.2) ) / Elapsed Minutes
+    const netWpm = Math.max(0, Math.round(((correctChars / 5) - (errorCount * 0.2)) / elapsedMinutes));
+
+    setLiveWpm(netWpm);
+
+    const totalTyped = typedInput.length;
     const accuracy = totalTyped > 0 ? Math.round(((totalTyped - errorCount) / totalTyped) * 100) : 100;
-    setLiveAccuracy(accuracy);
-  }, [typedInput, errorCount, isStarted, startTime]);
+    setLiveAccuracy(Math.max(0, accuracy));
+  }, [typedInput, errorCount, isStarted, startTime, targetText]);
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (isFinished) return;
@@ -142,7 +150,6 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       const delayMs = lastKeyTimeRef.current > 0 ? now - lastKeyTimeRef.current : 0;
       lastKeyTimeRef.current = now;
 
-      // Burst WPM calculation
       const instantWpm = delayMs > 0 ? Math.round((60000 / delayMs) / 5) : liveWpm;
 
       if (soundEnabled) {
@@ -187,13 +194,21 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
     const now = Date.now();
     const start = startTime || now;
     const durationSeconds = Math.max(1, (now - start) / 1000);
+    const durationMinutes = durationSeconds / 60;
 
-    const totalChars = finalTyped.length;
-    const finalWpm = Math.round((totalChars / 5) / (durationSeconds / 60));
-    const rawWpm = Math.round(((totalChars + backspaceCount) / 5) / (durationSeconds / 60));
+    let correctChars = 0;
+    for (let i = 0; i < finalTyped.length; i++) {
+      if (finalTyped[i] === targetText[i]) {
+        correctChars += 1;
+      }
+    }
 
-    const totalTypedWithErr = totalChars + errorCount;
-    const finalAccuracy = totalTypedWithErr > 0 ? Math.round(((totalTypedWithErr - errorCount) / totalTypedWithErr) * 100) : 100;
+    // Precise Standard WPM calculations
+    const rawWpm = Math.round((finalTyped.length / 5) / durationMinutes);
+    const netWpm = Math.max(0, Math.round(((correctChars / 5) - (errorCount * 0.2)) / durationMinutes));
+
+    const totalTypedWithErr = finalTyped.length;
+    const finalAccuracy = totalTypedWithErr > 0 ? Math.round(((correctChars) / totalTypedWithErr) * 100) : 100;
 
     const heatmap: Record<string, KeyHeatmapData> = {};
     const fingerStats: Record<string, FingerStat> = {};
@@ -227,16 +242,16 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
     const result: TestResult = {
       id: `tr_${Date.now()}`,
       timestamp: now,
-      wpm: finalWpm,
+      wpm: netWpm,
       rawWpm,
-      accuracy: finalAccuracy,
+      accuracy: Math.max(0, finalAccuracy),
       errorCount,
       missingCount,
       correctedErrors: backspaceCount,
       uncorrectedErrors: Math.max(0, errorCount - backspaceCount),
       consistency,
       keystrokeCount: keystrokes.length,
-      characterCount: totalChars,
+      characterCount: finalTyped.length,
       backspaceCount,
       durationSeconds: Math.round(durationSeconds),
       mode,
@@ -253,33 +268,42 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto flex flex-col items-center gap-4 my-2 relative">
-      {/* Compact Live Metrics Bar */}
-      <div className="flex items-center justify-between w-full px-5 py-2.5 bg-slate-900/90 border border-slate-800 rounded-2xl backdrop-blur-md shadow-xl">
-        <div className="flex items-center gap-6">
+    <div className="w-full flex flex-col items-center gap-4 my-2 relative">
+      {/* Live Metrics Bar */}
+      <div className="flex items-center justify-between w-full px-6 py-3 bg-slate-900/90 border border-slate-800 rounded-2xl backdrop-blur-md shadow-xl">
+        <div className="flex items-center gap-8">
           <div className="flex flex-col">
-            <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">NET WPM</span>
+            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">NET WPM</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-cyan-400 font-mono tracking-tight">{liveWpm}</span>
-              <span className="text-[10px] font-bold text-cyan-500/80">WPM</span>
+              <span className="text-3xl font-black text-cyan-400 font-mono tracking-tight">{liveWpm}</span>
+              <span className="text-xs font-bold text-cyan-500/80">WPM</span>
             </div>
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">ACCURACY</span>
+            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">ACCURACY</span>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-emerald-400 font-mono tracking-tight">{liveAccuracy}%</span>
+              <span className="text-3xl font-black text-emerald-400 font-mono tracking-tight">{liveAccuracy}%</span>
             </div>
           </div>
 
           <div className="flex flex-col">
-            <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">
+            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">
               {mode === 'time' ? 'REMAINING' : 'PROGRESS'}
             </span>
             <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-indigo-400 font-mono tracking-tight">
+              <span className="text-3xl font-black text-indigo-400 font-mono tracking-tight">
                 {mode === 'time' ? `${timeLeft}s` : `${typedInput.length}/${targetText.length}`}
               </span>
+            </div>
+          </div>
+
+          <div className="flex flex-col">
+            <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">ERRORS / MISSING</span>
+            <div className="flex items-baseline gap-1 font-mono">
+              <span className="text-xl font-bold text-rose-400">{errorCount}</span>
+              <span className="text-slate-500">/</span>
+              <span className="text-xl font-bold text-amber-400">{missingCount}</span>
             </div>
           </div>
         </div>
@@ -290,10 +314,10 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
               resetState();
               onResetText();
             }}
-            className="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center gap-1.5 text-xs font-semibold transition-all shadow-md active:scale-95"
+            className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center gap-2 text-xs font-semibold transition-all shadow-md active:scale-95"
             title="Restart Test (Tab)"
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-4 h-4" />
             <span>Restart</span>
           </button>
         </div>
@@ -302,8 +326,8 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
       {/* Main Text Typing View Box */}
       <div
         onClick={() => inputRef.current?.focus()}
-        className={`w-full min-h-[180px] max-h-[280px] overflow-y-auto p-6 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all ${
-          dyslexicFont ? 'font-sans text-lg leading-relaxed tracking-wide' : 'font-mono text-xl leading-relaxed tracking-normal'
+        className={`w-full min-h-[220px] max-h-[340px] overflow-y-auto p-8 rounded-3xl bg-slate-950/90 border border-slate-800 shadow-2xl relative cursor-text select-none backdrop-blur-xl transition-all ${
+          dyslexicFont ? 'font-sans text-xl leading-relaxed tracking-wide' : 'font-mono text-2xl leading-relaxed tracking-normal'
         }`}
       >
         {/* Eye Focus Mode Blur Mask */}
@@ -345,8 +369,8 @@ export const TypingBox: React.FC<TypingBoxProps> = ({
         {/* Click to focus hint overlay */}
         {!isStarted && (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-950/60 backdrop-blur-xs rounded-3xl pointer-events-none">
-            <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-semibold shadow-lg animate-bounce">
-              <Play className="w-3.5 h-3.5 fill-cyan-400 text-cyan-400" />
+            <div className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-sm font-semibold shadow-lg animate-bounce">
+              <Play className="w-4 h-4 fill-cyan-400 text-cyan-400" />
               <span>Click here or start typing to begin</span>
             </div>
           </div>

@@ -27,6 +27,7 @@ import { soundEngine } from './services/soundEngine';
 import { getTheme } from './services/themeProvider';
 
 import confetti from 'canvas-confetti';
+import { Trophy, Flame, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export function App() {
   const [mode, setMode] = useState<TestMode>('time');
@@ -50,7 +51,6 @@ export function App() {
 
   const currentTheme = useMemo(() => getTheme(profile.activeTheme), [profile.activeTheme]);
 
-  // Generate test prompt text
   const targetText = useMemo(() => {
     return generateTestText(mode, subMode, wordOption, codeLang, 'ssc_chsl', category, customRawText);
   }, [mode, subMode, wordOption, codeLang, category, customRawText]);
@@ -68,11 +68,10 @@ export function App() {
     setProfile(updatedProfile);
     setQuests(getQuests());
 
-    // Trigger celebratory confetti if accuracy >= 95%
     if (result.accuracy >= 95) {
       confetti({
-        particleCount: 80,
-        spread: 70,
+        particleCount: 90,
+        spread: 80,
         origin: { y: 0.6 },
       });
     }
@@ -91,7 +90,7 @@ export function App() {
 
   return (
     <div className={`min-h-screen bg-gradient-to-br ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between selection:bg-cyan-500/30 font-sans transition-all duration-300 pb-6`}>
-      {/* Header */}
+      {/* Top Navigation */}
       <Header
         mode={mode}
         setMode={(m) => {
@@ -129,89 +128,185 @@ export function App() {
         onOpenCustomModal={() => setShowCustomModal(true)}
       />
 
-      {/* Main Content View */}
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 flex flex-col items-center justify-start gap-4">
-        {/* Ghost Race Bar if in Ghost Mode */}
-        {mode === 'ghost' && (
-          <GhostRace
-            userProgressPct={lastResult ? 100 : 45}
-            ghostProgressPct={70}
-            userWpm={lastResult ? lastResult.wpm : 0}
-            ghostWpm={profile.personalBests['time_30'] || 68}
+      {/* Main Full-Width Studio Layout (No Empty Space) */}
+      <main className="flex-1 w-full max-w-[1700px] mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-6 mt-2">
+        {/* Left Column: Primary Typing Engine & Analytics (8 Columns) */}
+        <section className="lg:col-span-8 flex flex-col gap-6 w-full">
+          {/* Ghost Race Bar if in Ghost Mode */}
+          {mode === 'ghost' && (
+            <GhostRace
+              userProgressPct={lastResult ? 100 : 45}
+              ghostProgressPct={70}
+              userWpm={lastResult ? lastResult.wpm : 0}
+              ghostWpm={profile.personalBests['time_30'] || 68}
+            />
+          )}
+
+          {/* Typing Box */}
+          <TypingBox
+            key={textKey}
+            targetText={targetText}
+            mode={mode}
+            subMode={subMode}
+            category={category}
+            timeOption={timeOption}
+            wordOption={wordOption}
+            soundEnabled={soundEnabled}
+            focusMode={focusMode}
+            dyslexicFont={dyslexicFont}
+            onTestComplete={handleTestComplete}
+            onResetText={handleResetText}
           />
-        )}
 
-        {/* Typing Engine */}
-        <TypingBox
-          key={textKey}
-          targetText={targetText}
-          mode={mode}
-          subMode={subMode}
-          category={category}
-          timeOption={timeOption}
-          wordOption={wordOption}
-          soundEnabled={soundEnabled}
-          focusMode={focusMode}
-          dyslexicFont={dyslexicFont}
-          onTestComplete={handleTestComplete}
-          onResetText={handleResetText}
-        />
+          {/* Completed Test Results Overview */}
+          {lastResult && (
+            <div className="w-full flex flex-col gap-6 animate-fadeIn" id="ai-coach-section">
+              {/* Quick Results Summary Cards */}
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3 w-full">
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
+                  <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">NET SPEED</span>
+                  <span className="text-3xl font-black text-cyan-400 font-mono tracking-tight">{lastResult.wpm}</span>
+                  <span className="text-[10px] text-cyan-500 font-bold">WPM</span>
+                </div>
 
-        {/* Completed Test Results Overview */}
-        {lastResult && (
-          <div className="w-full flex flex-col gap-6 animate-fadeIn" id="ai-coach-section">
-            {/* Quick Results Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-3 max-w-4xl mx-auto w-full">
-              <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
-                <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">NET SPEED</span>
-                <span className="text-3xl font-black text-cyan-400 font-mono tracking-tight">{lastResult.wpm}</span>
-                <span className="text-[10px] text-cyan-500 font-bold">WPM</span>
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
+                  <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">ACCURACY</span>
+                  <span className="text-3xl font-black text-emerald-400 font-mono tracking-tight">{lastResult.accuracy}%</span>
+                  <span className="text-[10px] text-emerald-500 font-bold">{lastResult.errorCount} Errors</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
+                  <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">RAW SPEED</span>
+                  <span className="text-3xl font-black text-indigo-400 font-mono tracking-tight">{lastResult.rawWpm}</span>
+                  <span className="text-[10px] text-indigo-500 font-bold">RAW WPM</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
+                  <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">PEAK BURST</span>
+                  <span className="text-3xl font-black text-emerald-400 font-mono tracking-tight">
+                    {Math.max(...lastResult.keystrokes.map((k) => k.instantWpm || lastResult.wpm))}
+                  </span>
+                  <span className="text-[10px] text-emerald-500 font-bold">PEAK WPM</span>
+                </div>
+
+                <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
+                  <span className="text-[10px] uppercase font-mono tracking-widest text-slate-400">SKIPPED</span>
+                  <span className="text-3xl font-black text-amber-400 font-mono tracking-tight">{lastResult.missingCount || 0}</span>
+                  <span className="text-[10px] text-amber-500 font-bold">MISSING</span>
+                </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
-                <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">ACCURACY</span>
-                <span className="text-3xl font-black text-emerald-400 font-mono tracking-tight">{lastResult.accuracy}%</span>
-                <span className="text-[10px] text-emerald-500 font-bold">{lastResult.errorCount} Errors</span>
-              </div>
+              {/* Full Width Multi-Metric Graph */}
+              <LiveAnalyticsGraph result={lastResult} />
 
-              <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
-                <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">RAW SPEED</span>
-                <span className="text-3xl font-black text-indigo-400 font-mono tracking-tight">{lastResult.rawWpm}</span>
-                <span className="text-[10px] text-indigo-500 font-bold">RAW WPM</span>
-              </div>
+              {/* AI Diagnostics */}
+              <AICoachCard result={lastResult} onStartAdaptivePractice={handleStartAdaptivePractice} />
 
-              <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
-                <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">BURST SPEED</span>
-                <span className="text-3xl font-black text-emerald-400 font-mono tracking-tight">
-                  {Math.max(...lastResult.keystrokes.map((k) => k.instantWpm || lastResult.wpm))}
-                </span>
-                <span className="text-[10px] text-emerald-500 font-bold">PEAK WPM</span>
-              </div>
+              {/* 3D Keystroke Replay Player */}
+              <KeystrokeReplay result={lastResult} />
+            </div>
+          )}
 
-              <div className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 flex flex-col items-center gap-0.5 shadow-xl">
-                <span className="text-[9px] uppercase font-mono tracking-widest text-slate-400">MISSING</span>
-                <span className="text-3xl font-black text-amber-400 font-mono tracking-tight">{lastResult.missingCount || 0}</span>
-                <span className="text-[10px] text-amber-500 font-bold">SKIPPED</span>
+          {/* Interactive Virtual Keyboard Visualizer */}
+          <VirtualKeyboard
+            activeKey={undefined}
+            heatmapData={lastResult?.heatmap}
+            showHeatmap={!!lastResult}
+          />
+        </section>
+
+        {/* Right Column: Studio Dashboard & Stats Sidebar (4 Columns - Fills Space) */}
+        <aside className="lg:col-span-4 flex flex-col gap-5 w-full">
+          {/* User Profile & Streak Widget */}
+          <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-2xl flex flex-col gap-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-indigo-600 flex items-center justify-center text-white font-black text-lg shadow-lg">
+                  {profile.level}
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-white">{profile.username}</h3>
+                  <p className="text-xs text-cyan-400 font-mono">{profile.title}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-xl text-xs font-bold text-amber-300">
+                <Flame className="w-4 h-4 text-amber-400 animate-bounce" />
+                <span>{profile.streakDays} Day Streak</span>
               </div>
             </div>
 
-            {/* 4-Series Analytics Graph (Speed, Raw, Burst, Errors, Missing) */}
-            <LiveAnalyticsGraph result={lastResult} />
-
-            {/* AI Diagnostics & Recommendations */}
-            <AICoachCard result={lastResult} onStartAdaptivePractice={handleStartAdaptivePractice} />
-
-            {/* 3D Keystroke Replay Player */}
-            <KeystrokeReplay result={lastResult} />
+            {/* Level XP Bar */}
+            <div className="flex flex-col gap-1">
+              <div className="flex justify-between text-xs font-mono text-slate-400">
+                <span>LEVEL {profile.level} PROGRESS</span>
+                <span>{profile.xp}/{profile.nextLevelXp} XP</span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+                <div
+                  className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full transition-all duration-500"
+                  style={{ width: `${(profile.xp / profile.nextLevelXp) * 100}%` }}
+                />
+              </div>
+            </div>
           </div>
-        )}
 
-        {/* Interactive Virtual Keyboard Visualizer */}
-        <VirtualKeyboard
-          activeKey={undefined}
-          heatmapData={lastResult?.heatmap}
-          showHeatmap={!!lastResult}
-        />
+          {/* Personal Bests Widget */}
+          <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-2xl flex flex-col gap-3">
+            <h3 className="text-xs uppercase font-mono tracking-widest text-slate-400 flex items-center gap-1.5">
+              <Trophy className="w-4 h-4 text-amber-400" />
+              <span>Personal Best Records</span>
+            </h3>
+
+            <div className="grid grid-cols-2 gap-2 font-mono text-xs">
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex flex-col">
+                <span className="text-[10px] text-slate-500">15s TIME</span>
+                <span className="text-base font-bold text-cyan-400">{profile.personalBests['time_15'] || 65} WPM</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex flex-col">
+                <span className="text-[10px] text-slate-500">30s TIME</span>
+                <span className="text-base font-bold text-cyan-400">{profile.personalBests['time_30'] || 72} WPM</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex flex-col">
+                <span className="text-[10px] text-slate-500">60s TIME</span>
+                <span className="text-base font-bold text-cyan-400">{profile.personalBests['time_60'] || 68} WPM</span>
+              </div>
+              <div className="p-2.5 rounded-xl bg-slate-950/80 border border-slate-800/80 flex flex-col">
+                <span className="text-[10px] text-slate-500">CODE MODE</span>
+                <span className="text-base font-bold text-cyan-400">{profile.personalBests['code'] || 55} WPM</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Daily Quests Sidebar Widget */}
+          <div className="p-5 rounded-3xl bg-slate-900/90 border border-slate-800 backdrop-blur-xl shadow-2xl flex flex-col gap-3">
+            <h3 className="text-xs uppercase font-mono tracking-widest text-slate-400 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <span>Active Daily Quests</span>
+            </h3>
+
+            <div className="flex flex-col gap-2">
+              {quests.map((q) => (
+                <div
+                  key={q.id}
+                  className={`p-3 rounded-2xl border flex flex-col gap-1.5 ${
+                    q.isCompleted
+                      ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-200'
+                      : 'bg-slate-950/80 border-slate-800 text-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs font-bold">
+                    <span>{q.title}</span>
+                    {q.isCompleted && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+                  </div>
+                  <div className="flex justify-between text-[10px] font-mono text-slate-400">
+                    <span>Progress: {q.progress}/{q.target}</span>
+                    <span className="text-amber-300">+{q.xpReward} XP</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </aside>
       </main>
 
       {/* RPG Gamification Drawer */}
